@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:descendantFocusability="blocksDescendants">
+
+    <ImageView
+            android:layout_width="65dp"
+            android:layout_height="65dp"
+            app:srcCompat="@mipmap/ic_launcher"
+            android:layout_alignParentTop="true" android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:id="@+id/menu_item_thumb"/>
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="none"
+            android:text="Name"
+            android:ems="10"
+            android:layout_alignParentTop="true"
+            android:layout_toRightOf="@+id/menu_item_thumb"
+            android:layout_toEndOf="@+id/menu_item_thumb"
+            android:id="@+id/menu_item_text"
+    />
+    <Button
+            android:text="Push Me"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_toRightOf="@+id/menu_item_text" android:layout_toEndOf="@+id/menu_item_text"
+            android:id="@+id/menu_item_btn"/>
+</RelativeLayout>
