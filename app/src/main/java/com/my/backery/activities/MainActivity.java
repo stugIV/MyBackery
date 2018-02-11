@@ -1,4 +1,4 @@
-package com.my.backery;
+package com.my.backery.activities;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -10,6 +10,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
+import com.my.backery.R;
+import com.my.backery.requests.GetMenuRequestTask;
 
 import java.util.Arrays;
 import java.util.List;
@@ -17,6 +19,8 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     private TextView mTextMessage;
+    private Button button;
+    private TextView lv_response;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -46,6 +50,28 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         mTextMessage = (TextView) findViewById(R.id.message);
+        button = (Button) findViewById(R.id.button_get);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                callList();
+            }
+        });
+        lv_response = (TextView) findViewById(R.id.lv_response);
+//        createMenu();
+
+//        new GetMenuRequestTask(getString(R.string.service_base_url)).execute();
+    }
+
+    private void callList() {
+        try {
+            new GetMenuRequestTask(getString(R.string.service_base_url)).execute();
+        }catch (Throwable e) {
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void createMenu() {
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 

@@ -7,7 +7,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        tools:context="com.my.backery.MainActivity">
+        tools:context="com.my.backery.activities.MainActivity">
 
     <FrameLayout
             android:id="@+id/content"
@@ -15,9 +15,16 @@
             android:layout_height="0dp"
             android:layout_weight="1">
 
+        <Button
+                android:text="Button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:id="@+id/button_get"/>
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:id="@+id/lv_response"/>
         <ListView
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="306dp"
                 android:id="@+id/list_view" android:visibility="visible"/>
     </FrameLayout>
 
