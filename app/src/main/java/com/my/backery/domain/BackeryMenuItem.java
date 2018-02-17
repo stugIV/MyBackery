@@ -1,6 +1,6 @@
 package com.my.backery.domain;
 
-public class MenuItem {
+public class BackeryMenuItem {
     private Integer id;
 
     private String itemName;

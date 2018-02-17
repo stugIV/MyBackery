@@ -1,6 +1,7 @@
-package com.my.backery.activities;
+package com.my.backery;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -10,8 +11,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
-import com.my.backery.R;
-import com.my.backery.requests.GetMenuRequestTask;
+import com.my.backery.domain.BackeryMenuItem;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
 import java.util.List;
@@ -60,23 +62,23 @@ public class MainActivity extends AppCompatActivity {
         lv_response = (TextView) findViewById(R.id.lv_response);
 //        createMenu();
 
-//        new GetMenuRequestTask(getString(R.string.service_base_url)).execute();
+        new GetMenuRequestTask(getString(R.string.service_base_url), this).execute();
     }
 
     private void callList() {
         try {
-            new GetMenuRequestTask(getString(R.string.service_base_url)).execute();
+            new GetMenuRequestTask(getString(R.string.service_base_url), this).execute();
         }catch (Throwable e) {
-            Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
 
-    private void createMenu() {
+    protected void createMenu(List<BackeryMenuItem> items) {
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
         ListView lv = (ListView) findViewById(R.id.list_view);
-        lv.setAdapter(new MyListAdapter(this, R.layout.menu_item, Arrays.asList("a", "b", "c")));
+        lv.setAdapter(new BackeryMenuListAdapter(this, R.layout.menu_item, items));
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -85,10 +87,10 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private class MyListAdapter extends ArrayAdapter<String> {
+    private class BackeryMenuListAdapter extends ArrayAdapter<BackeryMenuItem> {
         private int layout;
 
-        private MyListAdapter(Context context, int resource, List<String> objects) {
+        private BackeryMenuListAdapter(Context context, int resource, List<BackeryMenuItem> objects) {
             super(context, resource, objects);
             layout = resource;
         }
@@ -108,12 +110,14 @@ public class MainActivity extends AppCompatActivity {
                             Toast.makeText(getContext(), "Item clicked " + position, Toast.LENGTH_LONG).show();
                         }
                     });
-                viewHolder.title = (TextView) convertView.findViewById(R.id.menu_item_text);
+                viewHolder.itemName = (TextView) convertView.findViewById(R.id.menu_item_name);
+                viewHolder.price = (TextView) convertView.findViewById(R.id.menu_item_price);
                 viewHolder.button = (Button) convertView.findViewById(R.id.menu_item_btn);
                 convertView.setTag(viewHolder);
             }
             ViewHolder mainViewHolder = (ViewHolder) convertView.getTag();
-            mainViewHolder.title.setText(getItem(position));
+            mainViewHolder.itemName.setText(getItem(position).getItemName());
+            mainViewHolder.price.setText(""+getItem(position).getPrice());
             mainViewHolder.button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -125,9 +129,42 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public class GetMenuRequestTask extends AsyncTask<Void, Void, BackeryMenuItem[]> {
+        private static final String MENU_URL = "menu";
+
+        private String baseUrl;
+        private MainActivity activity;
+
+        public GetMenuRequestTask(String baseUrl, MainActivity activity) {
+            this.baseUrl = baseUrl;
+            this.activity = activity;
+        }
+
+        @Override
+        protected BackeryMenuItem[] doInBackground(Void... voids) {
+            RestTemplate restTemplate = new RestTemplate();
+            restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
+
+            BackeryMenuItem[] menuItems;
+            menuItems = restTemplate.getForObject(getUrl(), BackeryMenuItem[].class);
+            return menuItems;
+        }
+
+        @Override
+        protected void onPostExecute(BackeryMenuItem[] menuItems) {
+            activity.createMenu(Arrays.asList(menuItems));
+        }
+
+
+        private String getUrl() {
+            return new StringBuilder().append(baseUrl).append("/").append(MENU_URL).toString();
+        }
+    }
+
     public class ViewHolder {
         ImageView thumb;
-        TextView title;
+        TextView itemName;
+        TextView price;
         Button button;
     }
 }
