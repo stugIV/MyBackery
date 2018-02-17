@@ -23,6 +23,7 @@ public class MenuActivity extends AppCompatActivity {
 
     private TextView mTextMessage;
     private Button btnGet;
+    private ListView menuList;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -31,15 +32,12 @@ public class MenuActivity extends AppCompatActivity {
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.navigation_menu:
-//                    showMenu();
-                    callList();
+                    showMenu();
                     return true;
                 case R.id.navigation_orders:
-//                    mTextMessage.setText(R.string.title_orders);
-                    mTextMessage.setText("amy text");
+                    showOrders();
                     return true;
                 case R.id.navigation_notifications:
-                    mTextMessage.setText(R.string.title_notifications);
                     return true;
             }
             return false;
@@ -51,21 +49,32 @@ public class MenuActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_menu);
+        BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
+        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
         mTextMessage = (TextView) findViewById(R.id.message);
         btnGet = (Button) findViewById(R.id.button);
         btnGet.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                callList();
+                buildMenuList();
             }
         });
-//        createMenu();
+        menuList = (ListView) findViewById(R.id.menu_view);
 
-//        new GetMenuRequestTask(getString(R.string.service_base_url), this).execute();
+        buildMenuList();
     }
 
-    private void callList() {
+    protected void showMenu() {
+        menuList.setVisibility(View.VISIBLE);
+        buildMenuList();
+    }
+
+    protected void showOrders() {
+        menuList.setVisibility(View.INVISIBLE);
+    }
+
+    private void buildMenuList() {
         try {
             new GetMenuRequestTask(getString(R.string.service_base_url), this).execute();
         }catch (Throwable e) {
@@ -77,7 +86,7 @@ public class MenuActivity extends AppCompatActivity {
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
-        ListView lv = (ListView) findViewById(R.id.list_view);
+        ListView lv = (ListView) findViewById(R.id.menu_view);
         lv.setAdapter(new BackeryMenuListAdapter(this, R.layout.menu_item, items));
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
