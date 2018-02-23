@@ -20,6 +20,7 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 public class MenuFragment extends Fragment {
@@ -46,6 +47,7 @@ public class MenuFragment extends Fragment {
         private static final String MENU_URL = "menu";
 
         private String baseUrl;
+        private List<Exception> exceptions = new LinkedList<>();
 
         public GetMenuRequestTask(String baseUrl) {
             this.baseUrl = baseUrl;
@@ -57,15 +59,22 @@ public class MenuFragment extends Fragment {
 
             restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
 
-            BackeryMenu[] menuItems = new BackeryMenu[1];
-
-            menuItems = restTemplate.getForObject(getUrl(), BackeryMenu[].class);
-            return menuItems;
+            BackeryMenu[] menuItems;
+            try {
+                menuItems = restTemplate.getForObject(getUrl(), BackeryMenu[].class);
+                return menuItems;
+            }catch (Exception e) {
+                exceptions.add(e);
+            }
+            return null;
         }
 
         @Override
         protected void onPostExecute(BackeryMenu[] menuItems) {
-            createMenu(Arrays.asList(menuItems));
+            if (exceptions.isEmpty())
+                createMenu(Arrays.asList(menuItems));
+            else
+                Toast.makeText(context, exceptions.get(0).getMessage(),Toast.LENGTH_LONG).show();
         }
 
 
