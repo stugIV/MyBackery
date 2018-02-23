@@ -20,20 +20,21 @@ public class BackeryMenuItem {
 
     public BackeryMenuItem(Context context, ViewGroup parent, int layout) {
         this.context = context;
+        final Context c1 = context;
         LayoutInflater inflater = LayoutInflater.from(context);
         view = inflater.inflate(layout, parent, false);
 
         itemName = (TextView) view.findViewById(R.id.menu_item_name);
         price = (TextView) view.findViewById(R.id.menu_item_price);
         button = (Button) view.findViewById(R.id.menu_item_btn);
-//
-//        button.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-////                Toast.makeText(getContext(), "Button clicked " + position, Toast.LENGTH_LONG).show();
-//            }
-//        });
 
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(c1, "Button clicked " + itemName.getText(),
+                        Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     public void setItemName(String name) {

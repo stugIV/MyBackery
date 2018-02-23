@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="service_base_url">http://10.0.3.1:8080</string>
+    <string name="service_base_url">http://192.168.8.100:8080</string>
 </resources>
