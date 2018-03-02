@@ -7,6 +7,8 @@ public class BackeryMenu {
 
     private Double price;
 
+    private int amount = 0;
+
     public Integer getId() {
         return id;
     }
@@ -30,4 +32,8 @@ public class BackeryMenu {
     public void setPrice(Double price) {
         this.price = price;
     }
+
+    public int getAmount() { return amount;}
+
+    public void setAmount(int amount) { this.amount = amount;}
 }

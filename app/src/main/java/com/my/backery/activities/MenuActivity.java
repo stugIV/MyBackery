@@ -1,17 +1,22 @@
 package com.my.backery.activities;
 
-import android.app.Fragment;
 import android.app.FragmentManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.my.backery.R;
 import com.my.backery.fragment.MenuFragment;
 import com.my.backery.fragment.OrdersFragment;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 
 public class MenuActivity extends AppCompatActivity {
+
+    private MenuFragment menuFragment;
+    private OrdersFragment ordersFragment;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -40,10 +45,20 @@ public class MenuActivity extends AppCompatActivity {
         setContentView(R.layout.activity_menu);
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+
+        MappingJackson2HttpMessageConverter jsonConverter = new MappingJackson2HttpMessageConverter();
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        jsonConverter.setObjectMapper(objectMapper);
+
+        menuFragment = new MenuFragment();
+        menuFragment.setConverter(jsonConverter);
+        ordersFragment = new OrdersFragment();
+        ordersFragment.setConverter(jsonConverter);
+        showMenu();
     }
 
     protected void showMenu() {
-        Fragment menuFragment = new MenuFragment();
         FragmentManager fragmentManager = getFragmentManager();
         fragmentManager.beginTransaction()
                 .replace(R.id.content, menuFragment)
@@ -51,7 +66,7 @@ public class MenuActivity extends AppCompatActivity {
     }
 
     protected void showOrders() {
-        Fragment ordersFragment = new OrdersFragment();
+        ordersFragment.setSelectedMenuItems(menuFragment.selectedItems());
         FragmentManager fragmentManager = getFragmentManager();
         fragmentManager.beginTransaction()
                 .replace(R.id.content, ordersFragment)

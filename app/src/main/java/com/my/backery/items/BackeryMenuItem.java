@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.my.backery.R;
+import com.my.backery.domain.BackeryMenu;
 
 public class BackeryMenuItem {
     private ImageView thumb;
@@ -17,9 +18,11 @@ public class BackeryMenuItem {
     private Button button;
     private Context context;
     private View view;
+    private BackeryMenu menu;
 
-    public BackeryMenuItem(Context context, ViewGroup parent, int layout) {
+    public BackeryMenuItem(Context context, ViewGroup parent, int layout, final BackeryMenu menu) {
         this.context = context;
+        this.menu = menu;
         final Context c1 = context;
         LayoutInflater inflater = LayoutInflater.from(context);
         view = inflater.inflate(layout, parent, false);
@@ -33,6 +36,8 @@ public class BackeryMenuItem {
             public void onClick(View v) {
                 Toast.makeText(c1, "Button clicked " + itemName.getText(),
                         Toast.LENGTH_LONG).show();
+                view.setVisibility(View.INVISIBLE);
+                menu.setAmount(1);
             }
         });
     }
@@ -46,4 +51,6 @@ public class BackeryMenuItem {
     }
 
     public View getConvertView() { return view;}
+
+    public BackeryMenu getMenu() { return menu;}
 }

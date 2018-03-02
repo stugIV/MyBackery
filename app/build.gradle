@@ -36,5 +36,6 @@ dependencies {
     compile 'com.android.support:support-vector-drawable:27.+'
     compile 'org.springframework.android:spring-android-rest-template:1.0.1.RELEASE'
     compile 'com.fasterxml.jackson.core:jackson-databind:2.3.2'
+    compile 'org.projectlombok:lombok:1.16.20'
     testCompile 'junit:junit:4.12'
 }

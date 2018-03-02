@@ -4,28 +4,34 @@ import android.app.Fragment;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.design.widget.BottomNavigationView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 import com.my.backery.R;
-import com.my.backery.activities.MenuActivity;
 import com.my.backery.domain.BackeryMenu;
 import com.my.backery.items.BackeryMenuItem;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
 public class MenuFragment extends Fragment {
     private ListView menuListView;
     private Context context;
+    private MappingJackson2HttpMessageConverter converter;
+
+    public void setConverter(MappingJackson2HttpMessageConverter converter) {
+        this.converter = converter;
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_menu, null);
@@ -33,6 +39,20 @@ public class MenuFragment extends Fragment {
         context = getActivity().getApplicationContext();
         buildMenuList();
         return view;
+    }
+
+    public List<BackeryMenu> selectedItems() {
+        if (menuListView == null)
+            return Collections.emptyList();
+        ListAdapter adapter = menuListView.getAdapter();
+        List<BackeryMenu> selected = new LinkedList<>();
+        for(int i = 0; i < adapter.getCount(); ++i) {
+            BackeryMenu item = (BackeryMenu) adapter.getItem(i);
+            if(item.getAmount() > 0)
+                selected.add(item);
+        }
+
+        return selected;
     }
 
     private void buildMenuList() {
@@ -57,7 +77,7 @@ public class MenuFragment extends Fragment {
         protected BackeryMenu[] doInBackground(Void... voids) {
             RestTemplate restTemplate = new RestTemplate();
 
-            restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
+            restTemplate.getMessageConverters().add(converter);
 
             BackeryMenu[] menuItems;
             try {
@@ -104,7 +124,8 @@ public class MenuFragment extends Fragment {
         @Override
         public View getView(final int position, View convertView, ViewGroup parent) {
             if (convertView == null) {
-                BackeryMenuItem item = new BackeryMenuItem(getContext(), parent, layout);
+                BackeryMenuItem item =
+                        new BackeryMenuItem(getContext(), parent, layout, getItem(position));
                 convertView = item.getConvertView();
                 convertView.setTag(item);
             }
