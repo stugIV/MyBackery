@@ -5,10 +5,13 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -22,14 +25,26 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class MenuFragment extends Fragment {
     private ListView menuListView;
     private Context context;
-    private MappingJackson2HttpMessageConverter converter;
+    private MappingJackson2HttpMessageConverter converter
+            = new MappingJackson2HttpMessageConverter();
+    private List<BackeryMenu> menuItems = Collections.emptyList();
+    private Logger logger = Logger.getLogger(getClass().getName());
+
+    public void setMenuItems(List<BackeryMenu> menuItems) {
+        this.menuItems = menuItems;
+    }
 
     public void setConverter(MappingJackson2HttpMessageConverter converter) {
         this.converter = converter;
+    }
+
+    public void updateMenuItems(String url) {
+        new GetMenuRequestTask(url).execute();
     }
 
     @Override
@@ -37,7 +52,13 @@ public class MenuFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_menu, null);
         menuListView = view.findViewById(R.id.menuListView);
         context = getActivity().getApplicationContext();
-        buildMenuList();
+
+        try {
+            createMenu(menuItems);
+        } catch (Throwable e) {
+            Toast.makeText(context, e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+
         return view;
     }
 
@@ -55,14 +76,6 @@ public class MenuFragment extends Fragment {
         return selected;
     }
 
-    private void buildMenuList() {
-        try {
-            new GetMenuRequestTask(getString(R.string.service_base_url)).execute();
-        } catch (Throwable e) {
-            Toast.makeText(context, e.getMessage(), Toast.LENGTH_LONG).show();
-        }
-    }
-
     public class GetMenuRequestTask extends AsyncTask<Void, Void, BackeryMenu[]> {
         private static final String MENU_URL = "menu";
 
@@ -77,13 +90,16 @@ public class MenuFragment extends Fragment {
         protected BackeryMenu[] doInBackground(Void... voids) {
             RestTemplate restTemplate = new RestTemplate();
 
+            logger.info("doInBackground " + converter);
             restTemplate.getMessageConverters().add(converter);
 
             BackeryMenu[] menuItems;
             try {
+                logger.info("getForObject");
                 menuItems = restTemplate.getForObject(getUrl(), BackeryMenu[].class);
                 return menuItems;
             }catch (Exception e) {
+                logger.info("exception: " + e);
                 exceptions.add(e);
             }
             return null;
@@ -91,8 +107,10 @@ public class MenuFragment extends Fragment {
 
         @Override
         protected void onPostExecute(BackeryMenu[] menuItems) {
-            if (exceptions.isEmpty())
-                createMenu(Arrays.asList(menuItems));
+            if (exceptions.isEmpty()) {
+                logger.info("stMenuItems");
+                setMenuItems(Arrays.asList(menuItems));
+            }
             else
                 Toast.makeText(context, exceptions.get(0).getMessage(),Toast.LENGTH_LONG).show();
         }
@@ -103,11 +121,14 @@ public class MenuFragment extends Fragment {
         }
     }
 
-    protected void createMenu(List<BackeryMenu> items) {
+    protected void createMenu(final List<BackeryMenu> items) {
         menuListView.setAdapter(new BackeryMenuListAdapter(context, R.layout.menu_item, items));
         menuListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                items.get(position).setState(BackeryMenu.ItemState.ORDER_STATE);
+                items.get(position).setAmount(1);
+                ((BaseAdapter) parent.getAdapter()).notifyDataSetChanged();
                 Toast.makeText(context, "from OnCreate " + position, Toast.LENGTH_LONG).show();
             }
         });
@@ -123,14 +144,28 @@ public class MenuFragment extends Fragment {
 
         @Override
         public View getView(final int position, View convertView, ViewGroup parent) {
+            BackeryMenu menu = getItem(position);
+
             if (convertView == null) {
                 BackeryMenuItem item =
-                        new BackeryMenuItem(getContext(), parent, layout, getItem(position));
+                        new BackeryMenuItem(getContext(), parent, layout, menu);
                 convertView = item.getConvertView();
                 convertView.setTag(item);
             }
             BackeryMenuItem item = (BackeryMenuItem) convertView.getTag();
             item.setItemName(getItem(position).getItemName());
+            if (menu.getState().equals(BackeryMenu.ItemState.ORDER_STATE)) {
+                convertView.setVisibility(View.GONE);
+                convertView.setLayoutParams(
+                        new AbsListView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,1));
+            }
+            else {
+                convertView.setVisibility(View.VISIBLE);
+                convertView.setLayoutParams(
+                        new AbsListView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                                AbsListView.LayoutParams.MATCH_PARENT));
+
+            }
 
             return convertView;
         }

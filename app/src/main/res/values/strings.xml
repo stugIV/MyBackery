@@ -3,4 +3,13 @@
     <string name="title_menu">Menu</string>
     <string name="title_orders">Orders</string>
     <string name="title_notifications">Notifications</string>
+    <string name="STATUS_NEW">New</string>
+    <string name="STATUS_READY">Ready</string>
+    <string name="STATUS_ISSUED">Issued</string>
+    <string name="STATUS_APPROVED">Approved</string>
+    <string name="STATUS_UNKNOWN">Unknown status</string>
+    <string name="CURRENCY_RUB">RUB</string>
+    <string name="ITEMS">items</string>
+    <string name="ORDER_BUTTON_NOTHING_TO_ORDER">Nothing to order</string>
+    <string name="ORDER_BUTTON_ORDER">Order</string>
 </resources>

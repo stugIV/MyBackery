@@ -40,6 +40,9 @@ public class BackeryMenuItem {
                 menu.setAmount(1);
             }
         });
+
+        setItemName(menu.getItemName());
+        setPrice(menu.getPrice());
     }
 
     public void setItemName(String name) {

@@ -1,7 +1,6 @@
 package com.my.backery.domain;
 
 
-import android.view.MenuItem;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -12,7 +11,7 @@ public class OrderItem {
     @JsonIgnore
     private int id;
 
-    private int quantity;
+    private int amount;
 
     private BackeryMenu menuItem;
 
@@ -24,12 +23,12 @@ public class OrderItem {
         this.id = id;
     }
 
-    public int getQuantity() {
-        return quantity;
+    public int getAmount() {
+        return amount;
     }
 
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
+    public void setAmount(int amount) {
+        this.amount = amount;
     }
 
     public BackeryMenu getMenuItem() {
