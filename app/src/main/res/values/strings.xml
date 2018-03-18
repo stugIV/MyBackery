@@ -12,4 +12,5 @@
     <string name="ITEMS">items</string>
     <string name="ORDER_BUTTON_NOTHING_TO_ORDER">Nothing to order</string>
     <string name="ORDER_BUTTON_ORDER">Order</string>
+    <string name="FAILED_TO_FETCH_ORDERS">Failed to fetch orders:</string>
 </resources>

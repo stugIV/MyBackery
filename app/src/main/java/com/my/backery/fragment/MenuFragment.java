@@ -2,10 +2,10 @@ package com.my.backery.fragment;
 
 import android.app.Fragment;
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
@@ -18,14 +18,18 @@ import android.widget.Toast;
 import com.my.backery.R;
 import com.my.backery.domain.BackeryMenu;
 import com.my.backery.items.BackeryMenuItem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.logging.Logger;
 
 public class MenuFragment extends Fragment {
     private ListView menuListView;
@@ -33,7 +37,7 @@ public class MenuFragment extends Fragment {
     private MappingJackson2HttpMessageConverter converter
             = new MappingJackson2HttpMessageConverter();
     private List<BackeryMenu> menuItems = Collections.emptyList();
-    private Logger logger = Logger.getLogger(getClass().getName());
+    private Logger logger = LoggerFactory.getLogger(getClass().getName());
 
     public void setMenuItems(List<BackeryMenu> menuItems) {
         this.menuItems = menuItems;
@@ -43,7 +47,12 @@ public class MenuFragment extends Fragment {
         this.converter = converter;
     }
 
+    public void setContext(Context context) {
+        this.context = context;
+    }
+
     public void updateMenuItems(String url) {
+        logger.debug("MenuFragment.updateMenuItems");
         new GetMenuRequestTask(url).execute();
     }
 
@@ -90,16 +99,14 @@ public class MenuFragment extends Fragment {
         protected BackeryMenu[] doInBackground(Void... voids) {
             RestTemplate restTemplate = new RestTemplate();
 
-            logger.info("doInBackground " + converter);
             restTemplate.getMessageConverters().add(converter);
 
             BackeryMenu[] menuItems;
             try {
-                logger.info("getForObject");
                 menuItems = restTemplate.getForObject(getUrl(), BackeryMenu[].class);
+
                 return menuItems;
             }catch (Exception e) {
-                logger.info("exception: " + e);
                 exceptions.add(e);
             }
             return null;
@@ -108,16 +115,43 @@ public class MenuFragment extends Fragment {
         @Override
         protected void onPostExecute(BackeryMenu[] menuItems) {
             if (exceptions.isEmpty()) {
-                logger.info("stMenuItems");
                 setMenuItems(Arrays.asList(menuItems));
             }
-            else
-                Toast.makeText(context, exceptions.get(0).getMessage(),Toast.LENGTH_LONG).show();
+            else {
+                Toast.makeText(context, exceptions.get(0).getMessage(), Toast.LENGTH_LONG).show();
+            }
         }
 
 
         private String getUrl() {
             return new StringBuilder().append(baseUrl).append("/").append(MENU_URL).toString();
+        }
+    }
+
+    public static class GetIconTask extends AsyncTask<String, Void, Drawable> {
+
+        private BackeryMenuItem item;
+        public GetIconTask(BackeryMenuItem item) {
+            this.item = item;
+        }
+
+        @Override
+        protected Drawable doInBackground(String... strings) {
+            try {
+                URL url = new URL(strings[0]);
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                connection.setDoInput(true);
+                connection.connect();
+                InputStream is = (InputStream) connection.getInputStream();
+                return Drawable.createFromStream(is, "src");
+            }catch(Exception e) {
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Drawable result) {
+            item.setIcon(result);
         }
     }
 
@@ -153,6 +187,8 @@ public class MenuFragment extends Fragment {
                 convertView.setTag(item);
             }
             BackeryMenuItem item = (BackeryMenuItem) convertView.getTag();
+            new GetIconTask(item).execute(
+                    getString(R.string.service_base_url)+menu.getIconPath());
             item.setItemName(getItem(position).getItemName());
             if (menu.getState().equals(BackeryMenu.ItemState.ORDER_STATE)) {
                 convertView.setVisibility(View.GONE);

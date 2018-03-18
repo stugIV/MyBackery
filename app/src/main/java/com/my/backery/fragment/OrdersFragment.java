@@ -42,11 +42,12 @@ public class OrdersFragment extends Fragment {
         this.converter = converter;
     }
 
+    public void setContext(Context context) { this.context = context;}
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_orders, container, false);
         orderItemsList = view.findViewById(R.id.orderItemsList);
-        context = getActivity().getApplicationContext();
         orderButton = view.findViewById(R.id.orderButton);
         orderButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -108,12 +109,16 @@ public class OrdersFragment extends Fragment {
 
         @Override
         public View getView(final int position, View convertView, ViewGroup parent) {
+            BackeryMenu menu = getItem(position);
             if (convertView == null) {
                 BackeryMenuItem item =
-                        new BackeryMenuItem(getContext(), parent, layout, getItem(position));
+                        new BackeryMenuItem(getContext(), parent, layout, menu);
                 convertView = item.getConvertView();
                 convertView.setTag(item);
             }
+            BackeryMenuItem item = (BackeryMenuItem) convertView.getTag();
+            new MenuFragment.GetIconTask(item)
+                    .execute(getString(R.string.service_base_url)+menu.getIconPath());
 
             return convertView;
         }
@@ -135,12 +140,13 @@ public class OrdersFragment extends Fragment {
         protected BackeryMenu[] doInBackground(Void... voids) {
             RestTemplate restTemplate = new RestTemplate();
 
-            restTemplate.getMessageConverters().add(converter);
-
-            Order order = new Order();
-
-            order.setItems(oItems);
             try {
+                restTemplate.getMessageConverters().add(converter);
+
+                Order order = new Order();
+
+                order.setItems(oItems);
+
                 restTemplate.postForObject(getUrl(), order, Integer.class);
             }catch(Exception e) {
                 exceptions.add(e);
@@ -200,11 +206,11 @@ public class OrdersFragment extends Fragment {
         protected Order[] doInBackground(Void... voids) {
             RestTemplate restTemplate = new RestTemplate();
 
-            restTemplate.getMessageConverters().add(converter);
-
-            Order[] orders;
-
             try {
+                restTemplate.getMessageConverters().add(converter);
+
+                Order[] orders;
+
                 orders = restTemplate.getForObject(getUrl(), Order[].class);
                 return orders;
             }catch(Exception e) {
@@ -216,8 +222,9 @@ public class OrdersFragment extends Fragment {
         @Override
         protected void onPostExecute(Order[] orders) {
             if (!exceptions.isEmpty())
-                Toast.makeText(context, exceptions.get(0).getMessage(),Toast.LENGTH_LONG).show();
-            setOrders(orders);
+                Toast.makeText(context, getString(R.string.FAILED_TO_FETCH_ORDERS) + exceptions.get(0).getMessage(),Toast.LENGTH_LONG).show();
+            else
+                setOrders(orders);
         }
 
 

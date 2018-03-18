@@ -12,7 +12,9 @@
             android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:id="@+id/menu_item_thumb"/>
+            android:id="@+id/menu_item_thumb"
+            android:scaleType="fitXY"
+    />
     <TextView
             android:id="@+id/menu_item_name"
             android:layout_width="wrap_content"

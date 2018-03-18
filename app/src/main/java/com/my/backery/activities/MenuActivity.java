@@ -53,13 +53,16 @@ public class MenuActivity extends AppCompatActivity {
 
         menuFragment = new MenuFragment();
         menuFragment.setConverter(jsonConverter);
+        menuFragment.setContext(this);
         menuFragment.updateMenuItems(getString(R.string.service_base_url));
         ordersFragment = new OrdersFragment();
         ordersFragment.setConverter(jsonConverter);
+        ordersFragment.setContext(this);
         showMenu();
     }
 
     protected void showMenu() {
+        menuFragment.updateMenuItems(getString(R.string.service_base_url));
         FragmentManager fragmentManager = getFragmentManager();
         fragmentManager.beginTransaction()
                 .replace(R.id.content, menuFragment)

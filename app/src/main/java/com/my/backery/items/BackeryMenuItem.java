@@ -1,6 +1,7 @@
 package com.my.backery.items;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,6 +31,7 @@ public class BackeryMenuItem {
         itemName = (TextView) view.findViewById(R.id.menu_item_name);
         price = (TextView) view.findViewById(R.id.menu_item_price);
         button = (Button) view.findViewById(R.id.menu_item_btn);
+        thumb = (ImageView) view.findViewById(R.id.menu_item_thumb);
 
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -51,6 +53,10 @@ public class BackeryMenuItem {
 
     public void setPrice(double pr) {
         price.setText(""+pr);
+    }
+
+    public void setIcon(Drawable d) {
+        thumb.setImageDrawable(d);
     }
 
     public View getConvertView() { return view;}
